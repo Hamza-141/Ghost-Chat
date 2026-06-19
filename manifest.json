@@ -1,0 +1,19 @@
+{
+  "name": "Ghost Chat — Secure Messenger",
+  "short_name": "Ghost Chat",
+  "description": "Hide secret messages inside images with military-grade encryption. True anonymity, zero data collection.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#07070d",
+  "theme_color": "#4fd1c5",
+  "orientation": "any",
+  "categories": ["security", "communication", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%2307070d'/><path d='M192 213h.01M320 213h.01M256 42.6a170.6 170.6 0 0 0-170.6 170.6v256l64-64 53.3 53.3L256 405.3l53.3 53.3 53.3-53.3 64 64V213.2A170.6 170.6 0 0 0 256 42.6z' stroke='%234fd1c5' stroke-width='32' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

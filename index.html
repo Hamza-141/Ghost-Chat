@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ghost Chat | Steganographic Secure Messenger</title>
+  <meta name="description" content="Ghost Chat: Professional steganographic messenger. Hide encrypted messages inside images with AES-256-GCM encryption. True anonymity, zero data collection.">
+  <meta name="theme-color" content="#4fd1c5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <div class="onboarding-overlay" id="onboarding-overlay">
+    <div class="onboarding-modal">
+      <div class="onboard-step active" id="onboard-step-1">
+        <div class="onboard-ghost-big">
+          <svg viewBox="0 0 24 24" width="64" height="64" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 10h.01M15 10h.01M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"></path>
+          </svg>
+        </div>
+        <h1 class="onboard-title">Ghost Chat</h1>
+        <p class="onboard-desc">The steganographic messenger that hides your data in plain sight. No accounts. No servers. No traces.</p>
+        <div class="onboard-features">
+          <div class="onboard-feature">
+            <svg class="onboard-feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>AES-256 Encryption</span>
+          </div>
+          <div class="onboard-feature">
+            <svg class="onboard-feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>LSB Steganography</span>
+          </div>
+          <div class="onboard-feature">
+            <svg class="onboard-feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>Ephemeral Timers</span>
+          </div>
+          <div class="onboard-feature">
+            <svg class="onboard-feat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <span>100% Client-Side</span>
+          </div>
+        </div>
+        <button class="onboard-btn" id="onboard-next-1">Initialize Identity →</button>
+      </div>
+
+      <div class="onboard-step" id="onboard-step-2">
+        <div class="onboard-avatar-wrap" id="onboard-avatar"></div>
+        <h2 class="onboard-title" id="onboard-alias">Generating...</h2>
+        <p class="onboard-desc">Your anonymous identity has been created. An ECDSA P-256 keypair protects your signature.</p>
+        <div class="onboard-fingerprint" id="onboard-fingerprint"></div>
+        <p class="onboard-hint">You can export this identity from Settings at any time.</p>
+        <button class="onboard-btn" id="onboard-finish">Enter Workspace</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-overlay hidden" id="settings-overlay">
+    <div class="settings-modal">
+      <div class="settings-header">
+        <h2 class="settings-title">Settings</h2>
+        <button class="settings-close" id="settings-close" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="settings-body">
+        <div class="settings-section">
+          <div class="settings-section-title">Identity</div>
+          <div class="settings-identity-card" id="settings-identity-card">
+            <div class="settings-avatar" id="settings-avatar"></div>
+            <div class="settings-identity-info">
+              <div class="settings-alias" id="settings-alias">Loading...</div>
+              <div class="settings-fingerprint" id="settings-fingerprint">—</div>
+            </div>
+          </div>
+          <div class="settings-actions">
+            <button class="settings-action-btn" id="btn-regenerate-identity">Regenerate</button>
+            <button class="settings-action-btn" id="btn-export-identity">Export</button>
+            <button class="settings-action-btn" id="btn-import-identity">Import</button>
+            <input type="file" id="import-identity-input" accept=".json" style="display:none;">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Security Parameters</div>
+          <div class="settings-row">
+            <span>PBKDF2 Iterations</span>
+            <span class="settings-badge">600,000</span>
+          </div>
+          <div class="settings-row">
+            <span>Encryption Standard</span>
+            <span class="settings-badge">AES-256-GCM</span>
+          </div>
+          <div class="settings-row">
+            <span>Payload Compression</span>
+            <span class="settings-badge">DeflateRaw</span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Local Storage</div>
+          <div class="settings-row">
+            <span>Archived Transmissions</span>
+            <span class="settings-badge" id="settings-msg-count">0</span>
+          </div>
+          <div class="settings-actions">
+            <button class="settings-action-btn" id="btn-export-history">Export Log</button>
+            <button class="settings-action-btn settings-danger" id="btn-clear-history">Purge All Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" id="app-shell">
+
+    <header class="app-header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="logo-wrap">
+          <div class="logo-ghost" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 10h.01M15 10h.01M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-text">Ghost Chat</div>
+            <div class="logo-sub">SECURE STEGANOGRAPHIC MESSENGER</div>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          <span class="status-label">SECURE ENVIRONMENT</span>
+        </div>
+        <div class="header-badge">AES-256</div>
+        <button class="header-settings-btn" id="header-settings-btn" aria-label="Open settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+
+      <aside class="sidebar" id="sidebar">
+        <div class="identity-card" id="identity-card">
+          <div class="identity-avatar" id="identity-avatar"></div>
+          <div class="identity-info">
+            <div class="identity-alias" id="identity-alias">Identity</div>
+            <div class="identity-fp" id="identity-fp">—</div>
+          </div>
+          <div class="identity-status">
+            <span class="identity-status-dot"></span>
+            <span>Local Node Active</span>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <div class="history-header">
+            <span>Transmission Log</span>
+            <span class="history-count" id="history-count">0</span>
+          </div>
+          <div class="history-search">
+            <input type="text" class="history-search-input" id="history-search" placeholder="Search records..." aria-label="Search message history">
+          </div>
+          <div class="history-list" id="history-list">
+            <div class="history-empty" id="history-empty">
+              <div class="history-empty-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              </div>
+              <div>No local records found</div>
+              <div class="history-empty-sub">Encode or decode to begin</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="workspace" id="workspace">
+
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="encode" aria-label="Switch to Encode tab">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            ENCODE
+          </button>
+          <button class="tab-btn" data-tab="decode" aria-label="Switch to Decode tab">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            DECODE
+          </button>
+        </div>
+
+        <div class="tab-section active" id="section-encode">
+
+          <div class="step-label">
+            <span class="step-num">01</span>
+            SELECT CARRIER IMAGE
+            <button class="clear-btn" id="clear-encode" title="Clear form">Clear</button>
+          </div>
+
+          <input type="file" id="encode-file-input" accept="image/*" style="display:none;" aria-label="Carrier image file input">
+          <div class="drop-zone" id="encode-drop" role="button" tabindex="0" aria-label="Click or drag to upload carrier image">
+            <div class="drop-inner">
+              <svg class="drop-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="8" width="36" height="32" rx="3"/><circle cx="17" cy="20" r="4"/><path d="M6 32l10-10 8 8 6-6 12 12"/></svg>
+              <div class="drop-title">Drop carrier image here</div>
+              <div class="drop-hint">PNG · JPG · WEBP — Click to browse</div>
+            </div>
+          </div>
+
+          <div class="encode-preview hidden" id="encode-preview">
+            <div class="preview-wrap">
+              <img id="encode-img" alt="Carrier image preview" class="preview-img">
+              <div class="preview-badge">CARRIER</div>
+            </div>
+            <div class="capacity-panel">
+              <div class="capacity-header">
+                <span>CHANNEL CAPACITY</span>
+                <span class="cap-dimension" id="cap-dimension"></span>
+              </div>
+              <div class="cap-track">
+                <div class="cap-fill" id="cap-fill"></div>
+              </div>
+              <div class="cap-text" id="cap-text">— / — bytes usable</div>
+            </div>
+          </div>
+
+          <div class="step-label">
+            <span class="step-num">02</span>
+            COMPOSE MESSAGE
+          </div>
+
+          <div class="field-group">
+            <textarea
+              class="field-textarea"
+              id="encode-msg"
+              placeholder="Enter secure message data..."
+              rows="5"
+              maxlength="500000"
+              aria-label="Secret message to encode"
+            ></textarea>
+            <div class="field-footer">
+              <span class="char-count" id="msg-charcount">0 characters</span>
+            </div>
+          </div>
+
+          <div class="step-label">
+            <span class="step-num">03</span>
+            ENCRYPTION KEY
+            <span class="step-opt">OPTIONAL</span>
+          </div>
+
+          <div class="field-group pw-group">
+            <input
+              type="password"
+              class="field-input"
+              id="encode-pw"
+              placeholder="Leave empty to encode without encryption..."
+              aria-label="Encryption passphrase"
+              autocomplete="new-password"
+            >
+            <button class="pw-toggle" id="toggle-encode-pw" title="Toggle visibility">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-hint">If provided, data will be encrypted via AES-256-GCM before LSB injection.</div>
+
+          <div class="step-label">
+            <span class="step-num">04</span>
+            EPHEMERAL TIMER
+            <span class="step-opt">OPTIONAL</span>
+          </div>
+
+          <div class="self-destruct-group">
+            <div class="self-destruct-options">
+              <button class="sd-option active" data-sd="0">None</button>
+              <button class="sd-option" data-sd="30">30s</button>
+              <button class="sd-option" data-sd="300">5m</button>
+              <button class="sd-option" data-sd="3600">1h</button>
+              <button class="sd-option" data-sd="86400">24h</button>
+            </div>
+            <div class="sd-hint">Client UI will purge the decoded message after this threshold.</div>
+          </div>
+
+          <button class="btn btn-encode" id="encode-btn" disabled aria-label="Encode message">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/></svg>
+            ENCODE &amp; DOWNLOAD
+          </button>
+
+          <div class="encode-status" id="encode-status"></div>
+        </div>
+
+        <div class="tab-section" id="section-decode">
+
+          <div class="compression-warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span><strong>System Notice:</strong> Encoded PNG files sent via social media platforms (WhatsApp, Messenger) are often lossy-compressed, destroying hidden LSB data. Share via file-transfer protocols or as document attachments.</span>
+          </div>
+
+          <div class="step-label">
+            <span class="step-num">01</span>
+            LOAD ENCODED IMAGE
+            <button class="clear-btn" id="clear-decode" title="Clear form">Clear</button>
+          </div>
+
+          <input type="file" id="decode-file-input" accept="image/*" style="display:none;" aria-label="Encoded image file input">
+          <div class="drop-zone" id="decode-drop" role="button" tabindex="0" aria-label="Click or drag to upload encoded image">
+            <div class="drop-inner">
+              <svg class="drop-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14.899A7 7 0 1 1 15.71 8h16.58A7 7 0 1 1 44 14.899V33.1a7 7 0 1 1-11.71 6.9h-16.58A7 7 0 1 1 4 33.1V14.9z"/><circle cx="11" cy="24" r="3"/><circle cx="37" cy="24" r="3"/></svg>
+              <div class="drop-title">Drop encoded file here</div>
+              <div class="drop-hint">PNG format required — Click to browse</div>
+            </div>
+          </div>
+
+          <div class="encode-preview hidden" id="decode-preview">
+            <div class="preview-wrap">
+              <img id="decode-img" alt="Encoded image preview" class="preview-img">
+              <div class="preview-badge preview-badge-decode">TARGET</div>
+            </div>
+          </div>
+
+          <div class="step-label">
+            <span class="step-num">02</span>
+            DECRYPTION KEY
+            <span class="step-opt">IF ENCRYPTED</span>
+          </div>
+
+          <div class="field-group pw-group">
+            <input
+              type="password"
+              class="field-input"
+              id="decode-pw"
+              placeholder="Enter passphrase to decrypt..."
+              aria-label="Decryption passphrase"
+              autocomplete="current-password"
+            >
+            <button class="pw-toggle" id="toggle-decode-pw" title="Toggle visibility">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+
+          <button class="btn btn-decode" id="decode-btn" disabled aria-label="Decode image">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            DECODE MESSAGE
+          </button>
+
+          <div class="decode-output hidden" id="decode-output">
+            <div class="output-header">
+              <div class="output-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                PAYLOAD RECOVERED
+              </div>
+              <div class="output-actions">
+                <button class="copy-btn" id="copy-btn">Copy</button>
+              </div>
+            </div>
+            <div class="output-meta" id="output-meta"></div>
+            <div class="sd-countdown hidden" id="sd-countdown">
+              <div class="sd-countdown-bar" id="sd-countdown-bar"></div>
+              <span class="sd-countdown-text" id="sd-countdown-text">System purge in —</span>
+            </div>
+            <div class="output-text" id="decoded-text"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel-right" id="panel-right">
+        <div class="log-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          SYSTEM ACTIVITY
+        </div>
+
+        <div class="log-feed" id="log-feed" role="log" aria-live="polite">
+          <div class="log-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" width="32" height="32" opacity="0.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <div>No current activity</div>
+          </div>
+        </div>
+
+        <div class="how-it-works">
+          <div class="how-title">Technical Specifications</div>
+          <div class="how-steps">
+            <div class="how-step">
+              <span class="how-num">LSB</span>
+              <span>Data is embedded sequentially into the least significant bit of RGB pixel matrices.</span>
+            </div>
+            <div class="how-step">
+              <span class="how-num">AES</span>
+              <span>Cryptographic payloads utilize AES-256-GCM via WebCrypto, keyed with PBKDF2 (600k ops).</span>
+            </div>
+            <div class="how-step">
+              <span class="how-num">ZIP</span>
+              <span>Pre-encryption DeflateRaw compression maximizes channel density.</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </main>
+
+    <footer class="app-footer">
+      <span>Ghost Chat Engine v2.0 — Local Browser Environment Only</span>
+      <span class="footer-right">Zero-Trust Architecture</span>
+    </footer>
+
+  </div><nav class="mobile-nav" id="mobile-nav">
+    <button class="mobile-nav-btn active" data-nav="encode" aria-label="Encode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <span>Encode</span>
+    </button>
+    <button class="mobile-nav-btn" data-nav="decode" aria-label="Decode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      <span>Decode</span>
+    </button>
+    <button class="mobile-nav-btn" data-nav="history" aria-label="History">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 8v4l3 3M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/></svg>
+      <span>Log</span>
+    </button>
+    <button class="mobile-nav-btn" data-nav="settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <script src="js/identity.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/stego.js"></script>
+  <script src="js/app.js" defer></script>
+
+</body>
+</html>
